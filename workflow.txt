@@ -1,0 +1,29 @@
+1 - when the application first start, the require (passport) run all 
+    the code inside it (except two functions and callback)
+
+2 - all the middleware runs (include passport initialize and session)
+
+3 - then the login route fired (passport take charge of this route and display us the consent screen )
+
+4 - after allow take data from google, google redirect user to the redirect route which is /google/redirect
+
+5 - in the redirect route, passport continue to take charge of this and it take the code in url (req.query)
+    and interact with google service for receiving user data. Passport comeback with data and the callback in
+    passport configs fired. Inside this callback, we do some stuff and then call the done() method
+
+6 - Next, the serialize function run, do some stuff and store user data into session - note that
+    the session middleware (which was fired as first step) has created session for us
+
+7 - After that the controller in redirect route run and redirect us to profile route
+
+9 - So the request was made (which is the request for profile page), all the middleware was forced to run again
+    and at the session middleware, it detected our session (which was created by serialize function before)
+    and encrypt that session for us
+
+10 - Continue to reach the passport initialize middleware
+
+11 - Now, when we reach the passport session middleware, this middleware also detected session in our browser
+    so it pass to the deserialize function. All of what this function do is it attach the user data to request
+
+12 - Finally, we reach the routes and we run the matched route. That why right now we have req.user
+    because the deserialize function has attach that for us

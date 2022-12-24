@@ -3,8 +3,6 @@ require('dotenv').config();
 //! passport will know that we want to use Google strategy.
 //! Note that inside this file serialize/deserialize function will not run at the first time
 //! and also this line (6) is only run one time when we type npm-run-server
-//! so that why when we re-access the page or send any request the serialize function won't run
-//! because Passport is smart enough to know that we are re-access not newcomer
 require('./configs/passport-setup');
 const express = require('express');
 const app = express();
@@ -17,13 +15,20 @@ const passport = require('passport');
 //* set view engine
 app.set('view engine', 'ejs');
 //! use express-session instead of cookie-session in the course because the latter library has deprecated some
-//! functionality that will case error. So the first library is the alternative option
-//! By the way, this middleware help us to manage our cookie and session
+//! functionality that will case error. So this library is the alternative option
+//! By the way, this middleware help us to manage our cookie and session (create session for us)
+//! and also this middle can help us encrypt our session (if any)
 app.use(session({ secret: process.env.cookieKey, cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 
-//! initialize passport
-//TODO: research about these two methods (what are they, why we have to use)
+//! passport.initialize() is a middleware basically add passport instance
+//! to incoming request, check if there's a session object, and if it exists, and filed passport exists in it 
+//! (if not create one), assigns that object to session filed in passport
+//! that why when we want to access session we have to type like this: req.session.passport
 app.use(passport.initialize());
+//! passport.session looks for user field ( this field automatically created by passport because passport was 
+//! created for authentication so obviously named user), and if it finds one (if not then nothing happen), passes
+//! it to deserialize function and call it. Deserialize assign the user field in session to request (if it find one
+//! in session). This is why we can access user through request - req.user then the matched routed below fired
 app.use(passport.session());
 
 //* set routes
