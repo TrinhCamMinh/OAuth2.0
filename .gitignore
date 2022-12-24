@@ -61,4 +61,4 @@ typings/
 /configs/keys.js
 
 # Ignore worklow file
-/worklow.txt
+worklow.txt
